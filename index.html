@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Yew Shop</title>
+    <link data-trunk rel="css" href="css/bundle.css" />
+    <link data-trunk rel="copy-dir" href="public" />
+    <link data-trunk rel="icon" type="image/png" sizes="512x512" href="public/favicon.png" />
+    <!-- <link data-trunk rel="icon" type="image/png" sizes="16x16" href="public/favicon-16x16.png" />
+    <link data-trunk rel="apple-touch-icon" sizes="180x180" href="public/apple-touch-icon.png" /> -->
+    <base data-trunk-public-url />
+    <script src="https://unpkg.com/intasend-inlinejs-sdk@3.0.4/build/intasend-inline.js"></script>
+    <script type="">
+      let isObj = new window.IntaSend({
+        publicAPIKey: "ISPubKey_test_347ee874-ac7b-476c-b846-0894c9e8bdf6",
+        redirectURL: "http://localhost:3000",
+        live: false // or false for sandbox environment
+      })
+      .on("COMPLETE", (response) => { console.log("Checkout completed succesfully...", response) })
+      .on("FAILED", (response) => { console.log("Checkout failed", response) })
+      .on("IN-PROGRESS", () => { console.log("Checkout in progress...") })
+    </script>
+</head>
+<body class="">
+    <div id="app"></div>
+</body>
+</html>
