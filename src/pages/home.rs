@@ -79,28 +79,24 @@ pub fn home() -> Html {
         Callback::from(move |_: MouseEvent| {
             let checkout_payload = checkout_payload.clone();
             spawn_local(async move {
-                let checkout_response = checkout_session(checkout_payload.clone()).await.unwrap();
+                let api_response = checkout_session(checkout_payload.clone()).await.unwrap();
                 info!("CheckoutsAPI request");
                 web_sys::console::log_1(&JsValue::from_str(
                     &serde_json::to_string(&checkout_payload).unwrap(),
                 ));
-                info!("CheckoutsAPI response");
+                info!("Checkout URL");
                 web_sys::console::log_1(&JsValue::from_str(
-                    &serde_json::to_string(&checkout_response).unwrap(),
-                ));
-                info!("Total Amount");
-                web_sys::console::log_1(&JsValue::from_str(
-                    &serde_json::to_string(&total).unwrap(),
+                    &serde_json::to_string(&api_response.data.checkoutSession.url).unwrap(),
                 ));
                 // info!("Total Amount (Decimal)");
                 // web_sys::console::log_1(&JsValue::from_str(
                 //     &serde_json::to_string(&total_in_decimal).unwrap(),
                 // ));
-                // window()
-                //     .unwrap()
-                //     .location()
-                //     .set_href(&checkout_response.url)
-                //     .unwrap();
+                window()
+                    .unwrap()
+                    .location()
+                    .set_href(&api_response.data.checkoutSession.url)
+                    .unwrap();
             });
         })
     };
@@ -164,24 +160,24 @@ pub fn home() -> Html {
                     }).collect::<Html>()}
                 </div>
             </div>
-            <div class="bg-gray-700 text-white py-12 px-4 sm:px-6 lg:px-8 m-4 rounded-md">
-                <div class="max-w-7xl mx-auto">
-                    <h2 class="text-3xl font-extrabold tracking-tight sm:text-4xl">
-                        {"Welcome to Our Store"}
-                    </h2>
-                    <p class="mt-4 text-xl">
-                        {"Discover amazing products at unbeatable prices."}
-                    </p>
-                    <div class="mt-8">
-                        <button
-                            onclick={initiate_checkout_session.clone()}
-                            class="bg-white text-blue-600 px-6 py-3 rounded-md font-semibold text-lg hover:bg-blue-50 transition duration-300"
-                        >
-                            {"Checkout"}
-                        </button>
-                    </div>
-                </div>
-            </div>
+            // <div class="bg-gray-700 text-white py-12 px-4 sm:px-6 lg:px-8 m-4 rounded-md">
+            //     <div class="max-w-7xl mx-auto">
+            //         <h2 class="text-3xl font-extrabold tracking-tight sm:text-4xl">
+            //             {"Welcome to Our Store"}
+            //         </h2>
+            //         <p class="mt-4 text-xl">
+            //             {"Discover amazing products at unbeatable prices."}
+            //         </p>
+            //         <div class="mt-8">
+            //             <button
+            //                 onclick={initiate_checkout_session.clone()}
+            //                 class="bg-white text-blue-600 px-6 py-3 rounded-md font-semibold text-lg hover:bg-blue-50 transition duration-300"
+            //             >
+            //                 {"Checkout"}
+            //             </button>
+            //         </div>
+            //     </div>
+            // </div>
             if *cart_visible {
                 <Cart items={(*cart_items).clone()} on_close={toggle_cart} on_checkout={initiate_checkout_session}/>
             }
@@ -189,17 +185,18 @@ pub fn home() -> Html {
     }
 }
 
-async fn checkout_session(payload: Value) -> Result<CheckoutResponse, reqwest::Error> {
+async fn checkout_session(payload: Value) -> Result<ApiResponse, reqwest::Error> {
     let client = Client::new();
-    let url = "https://sandbox.intasend.com/api/v1/checkout/";
-    let intasend_public_key = "ISPubKey_test_347ee874-ac7b-476c-b846-0894c9e8bdf6";
+    let url = "http://localhost:5000/checkout-session/";
+    // let intasend_public_key = "ISPubKey_test_347ee874-ac7b-476c-b846-0894c9e8bdf6";
     let res = client
         .post(url)
         .header("Content-Type", "application/json")
-        .header("X-IntaSend-Public-API-Key", intasend_public_key)
+        // .header("X-IntaSend-Public-API-Key", intasend_public_key)
+        .json(&payload)
         .send()
         .await?
-        .json::<CheckoutResponse>()
+        .json::<ApiResponse>()
         .await?;
     Ok(res)
 }
@@ -241,6 +238,18 @@ pub struct CheckoutResponse {
     pub amount: Decimal,
     pub currency: Currency,
     pub paid: bool,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[allow(non_snake_case)]
+pub struct ApiData {
+  checkoutSession: CheckoutResponse
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ApiResponse {
+  pub message: String,
+  pub data: ApiData
 }
 
 // #[function_component(Home)]

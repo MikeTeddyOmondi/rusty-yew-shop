@@ -61,7 +61,7 @@ pub fn cart(props: &CartProps) -> Html {
                         method = {None::<CheckoutMethod>}
                         amount = {Decimal::from_f64(total).unwrap_or(Decimal::TEN)}
                         currency = {Some(Currency::Kes)}
-                        // on_checkout = {let on_checkout = on_checkout.clone(); Callback::from(move |_| on_checkout)}
+                        on_checkout = {props.on_checkout.clone()} // {let on_checkout = props.on_checkout.clone(); Callback::from(move |_| on_checkout)}
                       />
                       // <div class="px-4 py-3">
                       //   <button
